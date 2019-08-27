@@ -10,14 +10,9 @@ import cProfile
 
 from pygame.locals import *
 
-# region ProfileCode
-profile = cProfile.Profile()
-# profile.enable()
-# endregion
 pygame.init()
 logic = Logic
 logic.Initialize()
-pygame.display.set_caption("Жизнь ботов (старт {0})".format(logic.startTime))
 RUNCLOCK = pygame.time.Clock()
 DISPLAYSURF = pygame.display.set_mode(Config.WINDOW_SIZE)
 
@@ -28,16 +23,13 @@ import Interface
 Interface.__init__(Config.WINDOW_SIZE)
 
 
+#region basicFunctions
 def InitScreenshotCapture():
     global screenCaptureFolderIndex, todayDate
     todayDate = str(datetime.date.today().strftime('%Y-%m-%d'))
     while os.path.exists("{0}/{1}_{2}".format(Config.screenshotDefaultFolder, todayDate, screenCaptureFolderIndex)):
         screenCaptureFolderIndex += 1
     os.makedirs("{0}/{1}_{2}".format(Config.screenshotDefaultFolder, todayDate, screenCaptureFolderIndex))
-
-
-if Config.captureScreenshots is True:
-    InitScreenshotCapture()
 
 
 def makeScreenshot():
@@ -54,10 +46,6 @@ def tick():
     logic.ticksPerSecondCurrent = int(RUNCLOCK.get_fps())
     logic.tick()
     makeScreenshot()
-
-
-logic.fillWorldWithOrganic(logic.DEFAULT_START_BOT_QUANTITY)
-logic.fillWorldWithBots(logic.DEFAULT_START_BOT_QUANTITY)
 
 
 def HandleEvents():
@@ -84,17 +72,25 @@ def HandleEvents():
             if event.key == K_x:
                 logic.reset()
 
-# region Events
 
-
-def terminate():
-    # profile.disable()
-    # profile.print_stats(sort="time")
+def terminate():    
     pygame.quit()
-    os._exit(0)
-    #sys.exit(0)
+    sys.exit(0)
 
-# endregion
+#endregion
+
+
+if Config.captureScreenshots is True:
+    InitScreenshotCapture()
+    pygame.display.set_caption("Anemun Evolution Simulator (started at {0}; screenshot folder: {1})".format(logic.startTime, 
+                                                                                                            Config.screenshotDefaultFolder))
+else:
+    pygame.display.set_caption("Anemun Evolution Simulator (started at {0})".format(logic.startTime))
+
+
+logic.fillWorldWithOrganic(logic.DEFAULT_START_BOT_QUANTITY)
+logic.fillWorldWithBots(logic.DEFAULT_START_BOT_QUANTITY)
+
 
 # main loop
 while True:
@@ -113,3 +109,4 @@ while True:
                   .format(len(logic.activeBots), len(logic.organicInWorld), logic.ticksPerSecondCurrent, logic.tickIndex))
     pygame.display.update()
     RUNCLOCK.tick(Config.MAX_TICKS_PER_SECOND)
+
